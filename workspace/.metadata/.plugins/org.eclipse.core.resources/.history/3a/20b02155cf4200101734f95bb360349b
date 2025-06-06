@@ -1,6 +1,5 @@
 
 /* Includes ------------------------------------------------------------------*/
-#include <stdio.h>
 #include "main.h"
 #include "cmsis_os.h"
 
@@ -10,8 +9,6 @@ UART_HandleTypeDef huart2;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
-
-int __io_putchar(int ch);
 
 /**
   * @brief The application entry point.
@@ -33,21 +30,8 @@ int main(void)
   /* Infinite loop */
   while (1)
   {
-	  printf("Hello from STM32 \n\r");
-  }
-}
 
-/**
-  * @brief Retargets the C library printf function to UART.
-  * @note This function is typically used when you want printf() output to be
-  * redirected to a UART (e.g., for debugging).
-  * @param ch Character to be transmitted.
-  * @retval The transmitted character.
-  */
-int __io_putchar(int ch)
-{
-	HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 0xFFFF);
-	return ch;
+  }
 }
 
 /**
