@@ -36,7 +36,7 @@ Functions are prefixed with both the type they return, and the module they are d
 * e.g., `xQueueReceive()` - Returns a variable of type `BaseType_t` and is defined within `queue.c`.
 * e.g., `pvTimerGetTimerID()` - Returns a pointer to void and is defined within `timers.c`.
 
-### Macro Names
+### Macros
 
 * Macro in **uppercase**.
 * Prefix in **lowercase**.
