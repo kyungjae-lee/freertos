@@ -14,10 +14,8 @@ void vBlueLedControllerTask(void *pvParameters);
 void vRedLedControllerTask(void *pvParameters);
 void vGreenLedControllerTask(void *pvParameters);
 
-/* Data types ----------------------------------------------------------------*/
 typedef uint32_t TaskProfiler;
 
-/* Variables -----------------------------------------------------------------*/
 TaskProfiler RedTaskProfiler;
 TaskProfiler BlueTaskProfiler;
 TaskProfiler GreenTaskProfiler;
@@ -52,15 +50,9 @@ int main(void)
 	/* Infinite loop */
 	while (1)
 	{
-		/* Do nothing */
 	}
 }
 
-/**
- * @brief A sample task handler that creates two tasks before entering its
- * inifinite while loop to increment its profiler.
- * @retval None
- */
 void vRedLedControllerTask(void *pvParameters)
 {
 	xTaskCreate(vBlueLedControllerTask,
@@ -83,10 +75,6 @@ void vRedLedControllerTask(void *pvParameters)
 	}
 }
 
-/**
- * @brief A sample task handler to increment its profiler.
- * @retval None
- */
 void vBlueLedControllerTask(void *pvParameters)
 {
 	while (1)
@@ -95,10 +83,6 @@ void vBlueLedControllerTask(void *pvParameters)
 	}
 }
 
-/**
- * @brief A sample task handler to increment its profiler.
- * @retval None
- */
 void vGreenLedControllerTask(void *pvParameters)
 {
 	while (1)
