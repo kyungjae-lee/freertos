@@ -38,19 +38,22 @@ int main(void)
 	/* Create tasks */
 	xTaskCreate(vRedLedControllerTask,
 				"Red Led Controller",
-				100, NULL,
+				100,
+				NULL,
 				1,
 				NULL);
 
 	xTaskCreate(vBlueLedControllerTask,
 				"Blue Led Controller",
-				100, NULL,
+				100,
+				NULL,
 				1,
 				NULL);
 
 	xTaskCreate(vGreenLedControllerTask,
 				"Green Led Controller",
-				100, NULL,
+				100,
+				NULL,
 				1,
 				NULL);
 
