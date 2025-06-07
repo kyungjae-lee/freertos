@@ -59,6 +59,8 @@ Functions are prefixed with both the type they return, and the module they are d
 * The `cmcsis_os.h` header file includes `FreeRTOS.h`.
 * Shortcut to commenting out multiple lines: highlight the area -> `ctrl` + `/`
 * The larger the priority number, the higher the priority.
+* `vTaskDelay()` puts a task to sleep, and the scheduler will remove it from the Running state and place it into the Blocked state for the specified number of ticks. Once the delay expires, the task is moved back to the Ready state and will be scheduled to run again according to its priority.
+  * If you want to add a delay to a task but don't want to block it (i.e., keep it in Running state), simply use the `for` loop to implement a delay instead of using `vTaskDelay()`.
 
 ### GPIO
 
