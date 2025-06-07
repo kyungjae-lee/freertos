@@ -59,3 +59,7 @@ Functions are prefixed with both the type they return, and the module they are d
 * The `cmcsis_os.h` header file includes `FreeRTOS.h`.
 * Shortcut to commenting out multiple lines: highlight the area -> `ctrl` + `/`
 
+### GPIO
+
+* Push-pull mode (for normal output pins) vs. Open-drain mode (for I2C, SPI pins)?
+
