@@ -11,14 +11,6 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 int __io_putchar(int ch);
 void vBlueLedControllerTask(void *pvParameters);
-void vRedLedControllerTask(void *pvParameters);
-void vGreenLedControllerTask(void *pvParameters);
-
-typedef uint32_t TaskProfiler;
-
-TaskProfiler RedTaskProfiler;
-TaskProfiler BlueTaskProfiler;
-TaskProfiler GreenTaskProfiler;
 
 /**
  * @brief The application entry point.
@@ -36,14 +28,14 @@ int main(void)
 	MX_USART2_UART_Init();
 
 	/* Create tasks */
-	xTaskCreate(vRedLedControllerTask,
-				"Red Led Controller",
+	xTaskCreate(vBlueLedControllerTask,
+				"Blue Led Controller",
 				100, NULL,
 				1,
 				NULL);
 
-	xTaskCreate(vBlueLedControllerTask,
-				"Blue Led Controller",
+	xTaskCreate(vRedLedControllerTask,
+				"Red Led Controller",
 				100, NULL,
 				1,
 				NULL);
@@ -53,7 +45,6 @@ int main(void)
 				100, NULL,
 				1,
 				NULL);
-
 	vTaskStartScheduler();
 
 	/* We should never get here as control is now taken by the scheduler */
@@ -64,19 +55,19 @@ int main(void)
 	}
 }
 
-void vRedLedControllerTask(void *pvParameters)
-{
-	while (1)
-	{
-		RedTaskProfiler++;
-	}
-}
-
 void vBlueLedControllerTask(void *pvParameters)
 {
 	while (1)
 	{
-		BlueTaskProfiler++;
+		printf("vBlueLedControllTask running...\n\r");
+	}
+}
+
+void vRedLedControllerTask(void *pvParameters)
+{
+	while (1)
+	{
+		printf("vRedLedControllerTask running...\n\r");
 	}
 }
 
@@ -84,7 +75,7 @@ void vGreenLedControllerTask(void *pvParameters)
 {
 	while (1)
 	{
-		GreenTaskProfiler++;
+		printf("vGreenLedControllerTask running...\n\r");
 	}
 }
 

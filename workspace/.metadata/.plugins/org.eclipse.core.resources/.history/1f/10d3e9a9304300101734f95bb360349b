@@ -9,16 +9,8 @@ UART_HandleTypeDef huart2;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
+
 int __io_putchar(int ch);
-void vBlueLedControllerTask(void *pvParameters);
-void vRedLedControllerTask(void *pvParameters);
-void vGreenLedControllerTask(void *pvParameters);
-
-typedef uint32_t TaskProfiler;
-
-TaskProfiler RedTaskProfiler;
-TaskProfiler BlueTaskProfiler;
-TaskProfiler GreenTaskProfiler;
 
 /**
  * @brief The application entry point.
@@ -35,56 +27,12 @@ int main(void)
 	MX_GPIO_Init();
 	MX_USART2_UART_Init();
 
-	/* Create tasks */
-	xTaskCreate(vRedLedControllerTask,
-				"Red Led Controller",
-				100, NULL,
-				1,
-				NULL);
-
-	xTaskCreate(vBlueLedControllerTask,
-				"Blue Led Controller",
-				100, NULL,
-				1,
-				NULL);
-
-	xTaskCreate(vGreenLedControllerTask,
-				"Green Led Controller",
-				100, NULL,
-				1,
-				NULL);
-
-	vTaskStartScheduler();
-
 	/* We should never get here as control is now taken by the scheduler */
 
 	/* Infinite loop */
 	while (1)
 	{
-	}
-}
-
-void vRedLedControllerTask(void *pvParameters)
-{
-	while (1)
-	{
-		RedTaskProfiler++;
-	}
-}
-
-void vBlueLedControllerTask(void *pvParameters)
-{
-	while (1)
-	{
-		BlueTaskProfiler++;
-	}
-}
-
-void vGreenLedControllerTask(void *pvParameters)
-{
-	while (1)
-	{
-		GreenTaskProfiler++;
+		printf("Hello from STM32 \n\r");
 	}
 }
 

@@ -68,7 +68,7 @@ void vRedLedControllerTask(void *pvParameters)
 {
 	while (1)
 	{
-		RedTaskProfiler++;
+		printf("vRedLedControllerTask running...\n\r");
 	}
 }
 
@@ -76,7 +76,7 @@ void vBlueLedControllerTask(void *pvParameters)
 {
 	while (1)
 	{
-		BlueTaskProfiler++;
+		printf("vBlueLedControllTask running...\n\r");
 	}
 }
 
@@ -84,7 +84,7 @@ void vGreenLedControllerTask(void *pvParameters)
 {
 	while (1)
 	{
-		GreenTaskProfiler++;
+		printf("vGreenLedControllerTask running...\n\r");
 	}
 }
 
