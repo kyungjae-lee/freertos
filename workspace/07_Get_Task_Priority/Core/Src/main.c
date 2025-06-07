@@ -1,14 +1,10 @@
 /*******************************************************************************
  *
  * @file	main.c
- * @brief	Demonstrates how a task can change its own priority during runtime
- * 			in a FreeRTOS application.
+ * @brief	Demonstrates how to get the priority of a task during runtime in a
+ * 			FreeRTOS application.
  * @author	Kyungjae Lee
  * @date	Jun 7, 2025
- * @note	The highest-priority task, 'vGreenLedControllerTask', will run
- * 			exclusively until it lowers its priority to 1. At that point, all
- * 			three tasks with the same priority level will begin executing
- * 			concurrently (time-sliced).
  *
  ******************************************************************************/
 
@@ -34,9 +30,12 @@ TaskProfiler RedTaskProfiler;
 TaskProfiler BlueTaskProfiler;
 TaskProfiler GreenTaskProfiler;
 UART_HandleTypeDef huart2;
-TaskHandle_t xGreenLedTaskHandle;
-TaskHandle_t xRedLedTaskHandle;
-TaskHandle_t xBlueLedTaskHandle;
+TaskHandle_t xGreenTaskHandle;
+TaskHandle_t xRedTaskHandle;
+TaskHandle_t xBlueTaskHandle;
+uint32_t uGreenTaskPriority;
+uint32_t uRedTaskPriority;
+uint32_t uBlueTaskPriority;
 
 /**
  * @brief The application entry point.
@@ -59,21 +58,21 @@ int main(void)
 				100,
 				NULL,
 				1,		/* higher priority than other tasks. */
-				&xGreenLedTaskHandle);
+				&xGreenTaskHandle);
 
 	xTaskCreate(vRedLedControllerTask,
 				"Red Led Controller",
 				100,
 				NULL,
 				1,
-				&xRedLedTaskHandle);
+				&xRedTaskHandle);
 
 	xTaskCreate(vBlueLedControllerTask,
 				"Blue Led Controller",
 				100,
 				NULL,
-				2,		/* Initially the highest priority. */
-				&xBlueLedTaskHandle);
+				1,		/* Initially the highest priority. */
+				&xBlueTaskHandle);
 
 	vTaskStartScheduler();
 
@@ -99,11 +98,13 @@ void vGreenLedControllerTask(void *pvParameters)
 }
 
 /**
- * @brief Increments its profiler.
+ * @brief Gets the priority of the green task and increments its profiler.
  * @retval None
  */
 void vRedLedControllerTask(void *pvParameters)
 {
+	uGreenTaskPriority = uxTaskPriorityGet(xGreenTaskHandle);
+
 	while (1)
 	{
 		RedTaskProfiler++;
@@ -111,19 +112,11 @@ void vRedLedControllerTask(void *pvParameters)
 }
 
 /**
- * @brief Increments its profiler and changes its own priority.
+ * @brief Increments its profiler.
  * @retval None
  */
 void vBlueLedControllerTask(void *pvParameters)
 {
-	for (int i = 0; i < 500000; i++)
-	{
-		BlueTaskProfiler++;
-	}
-
-	/* Pass NULL or its own task handle to reference itself. */
-	vTaskPrioritySet(NULL, 1);
-
 	while (1)
 	{
 		BlueTaskProfiler++;
