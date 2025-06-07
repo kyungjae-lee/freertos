@@ -58,6 +58,7 @@ Functions are prefixed with both the type they return, and the module they are d
 * The CMSIS-RTOS layer sits on top of the FreeRTOS layer and provides a common interface for various RTOSes. This allows programmers to write portable applications using a standardized API. In essence, CMSIS-RTOS is a wrapper around an existing RTOS.
 * The `cmcsis_os.h` header file includes `FreeRTOS.h`.
 * Shortcut to commenting out multiple lines: highlight the area -> `ctrl` + `/`
+* The larger the priority number, the higher the priority.
 
 ### GPIO
 
