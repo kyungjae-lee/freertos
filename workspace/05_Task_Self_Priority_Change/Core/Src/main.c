@@ -1,11 +1,10 @@
 /*******************************************************************************
  *
  * @file	main.c
- * @brief	Demonstrates how to change task priorities during runtime in a
- * 			FreeRTOS application.
+ * @brief	Demonstrates how a task can change its own priority during runtime
+ * 			in a FreeRTOS application.
  * @author	Kyungjae Lee
  * @date	Jun 7, 2025
- * @note	The larger the priority number, the higher the priority.
  *
  ******************************************************************************/
 
@@ -64,14 +63,14 @@ int main(void)
 				"Red Led Controller",
 				100,
 				NULL,
-				2,
+				1,
 				&xRedLedTaskHandle);
 
 	xTaskCreate(vBlueLedControllerTask,
 				"Blue Led Controller",
 				100,
 				NULL,
-				1,
+				2,
 				&xBlueLedTaskHandle);
 
 	vTaskStartScheduler();
@@ -98,37 +97,35 @@ void vGreenLedControllerTask(void *pvParameters)
 }
 
 /**
- * @brief Changes the priority of other task.
+ * @brief Increments its profiler.
  * @retval None
- * @note This task will increment its profiler only once and never have a chance
- * to run again as soon as the green led task's priority is promoted to 3.
  */
 void vRedLedControllerTask(void *pvParameters)
 {
-	int i;
-
 	while (1)
 	{
 		RedTaskProfiler++;
-
-		for (i = 0; i < 300000; i++)
-		{
-			/* Do nothing */
-		}
-
-		vTaskPrioritySet(xGreenLedTaskHandle, 3);
 	}
 }
 
 /**
- * @brief Increments its profiler.
+ * @brief Increments its profiler and changes its own priority.
  * @retval None
  */
 void vBlueLedControllerTask(void *pvParameters)
 {
+	for (int i = 0; i < 500000; i++)
+	{
+		BlueTaskProfiler++;
+	}
+
+	/* Pass NULL or its own task handle to reference itself. */
+	vTaskPrioritySet(NULL, 1);
+
 	while (1)
 	{
 		BlueTaskProfiler++;
+
 	}
 }
 
