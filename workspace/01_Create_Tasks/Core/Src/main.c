@@ -1,9 +1,16 @@
+/*******************************************************************************
+ *
+ * @file	main.c
+ * @brief	Demonstrates how to create tasks in a FreeRTOS application.
+ * @author	Kyungjae Lee
+ * @date	Jun 7, 2025
+ *
+ ******************************************************************************/
+
 /* Includes ------------------------------------------------------------------*/
 #include <stdio.h>
 #include "main.h"
 #include "cmsis_os.h"
-
-UART_HandleTypeDef huart2;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
@@ -21,6 +28,7 @@ typedef uint32_t TaskProfiler;
 TaskProfiler RedTaskProfiler;
 TaskProfiler BlueTaskProfiler;
 TaskProfiler GreenTaskProfiler;
+UART_HandleTypeDef huart2;
 
 /**
  * @brief The application entry point.
@@ -38,8 +46,22 @@ int main(void)
 	MX_USART2_UART_Init();
 
 	/* Create tasks */
+	xTaskCreate(vGreenLedControllerTask,
+				"Green Led Controller",
+				100,
+				NULL,
+				1,
+				NULL);
+
 	xTaskCreate(vRedLedControllerTask,
 				"Red Led Controller",
+				100,
+				NULL,
+				1,
+				NULL);
+
+	xTaskCreate(vBlueLedControllerTask,
+				"Blue Led Controller",
 				100,
 				NULL,
 				1,
@@ -57,26 +79,23 @@ int main(void)
 }
 
 /**
- * @brief A sample task handler that creates two tasks before entering its
- * inifinite while loop to increment its profiler.
+ * @brief A sample task handler to increment its profiler.
  * @retval None
+ */
+void vGreenLedControllerTask(void *pvParameters)
+{
+	while (1)
+	{
+		GreenTaskProfiler++;
+	}
+}
+
+/**
+ * @brief A sample task handler to increment its profiler.
+ * @retval Nonee
  */
 void vRedLedControllerTask(void *pvParameters)
 {
-	xTaskCreate(vBlueLedControllerTask,
-				"Blue Led Controller",
-				100,
-				NULL,
-				1,
-				NULL);
-
-	xTaskCreate(vGreenLedControllerTask,
-				"Green Led Controller",
-				100,
-				NULL,
-				1,
-				NULL);
-
 	while (1)
 	{
 		RedTaskProfiler++;
@@ -92,18 +111,6 @@ void vBlueLedControllerTask(void *pvParameters)
 	while (1)
 	{
 		BlueTaskProfiler++;
-	}
-}
-
-/**
- * @brief A sample task handler to increment its profiler.
- * @retval None
- */
-void vGreenLedControllerTask(void *pvParameters)
-{
-	while (1)
-	{
-		GreenTaskProfiler++;
 	}
 }
 
