@@ -13,7 +13,7 @@
 #include "cmsis_os.h"
 
 /* Macros --------------------------------------------------------------------*/
-#define DELAY_1000_MS pdMS_TO_TICKS(1000)
+#define DELAY_1000_MS_TICKS pdMS_TO_TICKS(1000)
 
 /* Data types ----------------------------------------------------------------*/
 typedef uint32_t TaskProfiler;
@@ -102,7 +102,7 @@ void vRedLedControllerTask(void *pvParameters)
 	while (1)
 	{
 		uRedTaskProfiler++;
-		vTaskDelay(DELAY_1000_MS);
+		vTaskDelay(DELAY_1000_MS_TICKS);
 	}
 }
 
