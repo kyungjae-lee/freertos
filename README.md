@@ -52,6 +52,42 @@ Functions are prefixed with both the type they return, and the module they are d
   * e.g., `pdPASS` - 1
   * e.g., `pdFAIL` - 0
 
+### Task States
+
+
+
+![image-20250607215046253](C:\Users\klee\AppData\Roaming\Typora\typora-user-images\image-20250607215046253.png)
+
+
+
+* Causes of the Blocked state:
+
+  - **Time-related event** – e.g., a task that is placed in the **Blocked** state for a specified duration using `vTaskDelay()` or similar.
+
+    - To use `vTaskDelay()` the following setting must be enabled:
+
+      ```c
+      /* FreeRTOSConfig.h */
+      #define INCLUDE_vTaskDelay	1
+      ```
+
+      The function prototype is:
+
+      ```c
+      vTaskDelay(TickType_t xTicksToDelay)
+      ```
+
+      This API places the calling task into the **Blocked** state for the specified number of tick interrupts, after which it transitions back into the **Ready** state.
+
+      Since the concept of system ticks can be unintuitive, FreeRTOS provides the `pdMS_TO_TICKS()` macro to convert time from milliseconds to ticks.
+      For example:
+
+      ```c
+      vTaskDelay(pdMS_TO_TICKS(100));  /* Delay for 100 milliseconds */
+      ```
+
+  - **Synchronization event** – e.g., a task waiting for a signal, such as a semaphore, event group, or notification from another task or ISR.
+
 
 
 ## Lessons Learned
@@ -61,8 +97,15 @@ Functions are prefixed with both the type they return, and the module they are d
 * The larger the priority number, the higher the priority.
 * `vTaskDelay()` puts a task to sleep, and the scheduler will remove it from the Running state and place it into the Blocked state for the specified number of ticks. Once the delay expires, the task is moved back to the Ready state and will be scheduled to run again according to its priority.
   * If you want to add a delay to a task but don't want to block it (i.e., keep it in Running state), simply use the `for` loop to implement a delay instead of using `vTaskDelay()`.
+* FreeRTOS configuration options can be modified through the `FreeRTOSConfig.h` file.
+* A deleted task cannot be resumed.
 
 ### GPIO
 
 * Push-pull mode (for normal output pins) vs. Open-drain mode (for I2C, SPI pins)?
 
+
+
+## Reference
+
+Gbati, I. (2023). *FreeRTOS  From Ground Up™  on ARM Processors (REVISED)* [Video file]. Retrieved from https://www.udemy.com/course/freertos-on-arm-processors/?couponCode=PLOYALTY0923
