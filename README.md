@@ -52,6 +52,10 @@ Functions are prefixed with both the type they return, and the module they are d
   * e.g., `pdPASS` - 1
   * e.g., `pdFAIL` - 0
 
+
+
+## Tasks
+
 ### Task States
 
 
@@ -87,6 +91,27 @@ Functions are prefixed with both the type they return, and the module they are d
       ```
 
   - **Synchronization event** – e.g., a task waiting for a signal, such as a semaphore, event group, or notification from another task or ISR.
+
+### Idle Task
+
+* There must be at least one task in the **Running** state at any given time. Because of this, the Idle task automatically enters the Running state when no other task is available to run.
+* The Idle task is created automatically when the scheduler starts.
+* The Idle task has the lowest priority (0), ensuring it never prevents a higher-priority application task from entering the **Running** state.
+
+### Idle Hook Function
+
+* We can add application-specific functionality directly into the Idle task through the use of an Idle hook (or Idle callback) function.
+
+* This function is called automatically by the Idle task once per iteration of the Idle task loop.
+
+* Enabling hook function:
+
+  ```c
+  /* FreeRTOSConfig.h */
+  #define configUSE_IDLE_HOOK()  1
+  ```
+
+* `configIDLE_SHOULD_YIELD` is used to prevent the Idle task from unnecessarily consuming CPU time by allowing it to yield the processor to ready tasks of equal priority.
 
 
 
