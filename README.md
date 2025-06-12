@@ -104,7 +104,7 @@ Functions are prefixed with both the type they return, and the module they are d
 
 * This function is called automatically by the Idle task once per iteration of the Idle task loop.
 
-* Enabling hook function:
+* Enabling idle hook function:
 
   ```c
   /* FreeRTOSConfig.h */
@@ -112,6 +112,23 @@ Functions are prefixed with both the type they return, and the module they are d
   ```
 
 * `configIDLE_SHOULD_YIELD` is used to prevent the Idle task from unnecessarily consuming CPU time by allowing it to yield the processor to ready tasks of equal priority.
+
+
+
+## Tick Hook
+
+* A tick hook (or tick callback) is a function called by the kernel during each tick interrupt.
+
+* Tick hook functions execute in the context of the tick interrupt and therefore must be kept very short, use only a moderate amount of stack space, and must not call any FreeRTOS API functions that do not end with `FromISR()`.
+
+* Enabling tick hook function:
+
+  ```c
+  /* FreeRTOSConfig.h */
+  #define configUSE_TICK_HOOK()  1
+  ```
+
+  
 
 
 
