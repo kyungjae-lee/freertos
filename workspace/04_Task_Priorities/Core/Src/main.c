@@ -26,9 +26,9 @@ void vGreenLedControllerTask(void *pvParameters);
 typedef uint32_t TaskProfiler;
 
 /* Variables -----------------------------------------------------------------*/
-TaskProfiler RedTaskProfiler;
-TaskProfiler BlueTaskProfiler;
-TaskProfiler GreenTaskProfiler;
+TaskProfiler uRedTaskProfiler;
+TaskProfiler uBlueTaskProfiler;
+TaskProfiler uGreenTaskProfiler;
 UART_HandleTypeDef huart2;
 
 /**
@@ -87,7 +87,7 @@ void vGreenLedControllerTask(void *pvParameters)
 {
 	while (1)
 	{
-		GreenTaskProfiler++;
+		uGreenTaskProfiler++;
 	}
 }
 
@@ -99,7 +99,7 @@ void vRedLedControllerTask(void *pvParameters)
 {
 	while (1)
 	{
-		RedTaskProfiler++;
+		uRedTaskProfiler++;
 	}
 }
 
@@ -111,7 +111,7 @@ void vBlueLedControllerTask(void *pvParameters)
 {
 	while (1)
 	{
-		BlueTaskProfiler++;
+		uBlueTaskProfiler++;
 	}
 }
 
