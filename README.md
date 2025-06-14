@@ -128,7 +128,86 @@ Functions are prefixed with both the type they return, and the module they are d
   #define configUSE_TICK_HOOK()  1
   ```
 
-  
+
+
+
+## Queues
+
+* Queues are used as FIFO buffers, where data is inserted at the back and removed from the front.
+* Queues can hold a finite number of fixed data items.
+* The maximum number of items a queue can hold is called the length.
+
+### Passing Data to a Queue
+
+* Pass-by-value
+  * Simply insert data into the queue.
+* Pass-by-reference
+  * Involves using queues to transfer pointers to the data, rather than copy the data itself into and out of the queue byte by byte.
+  * Preferred choice for passing large queue data.
+  * Saves memory.
+
+### Blocking
+
+* Blocking on queue reads
+
+  When a task attempts to read from a queue, it can optionally specify a 'block' time. This is the time the task will be kept in the **Blocked** state to wait for data to be available from the queue, if the queue is empty. As soon as data becomes available the task is automatically moved to the **Ready** state.
+
+* Blocking on queue writes
+
+  Task is placed in blocked state if queue is full, as soon as space becomes available in the queue task is moved to **Ready** state.
+
+### Commonly Used APIs
+
+* `xQueueSend()`, `xQueueSendToFront()`, `xQueueSendToBack()`
+
+  ```c
+  BaseType_t xQueueSend(QueueHandle_t xQueue,
+                        const void * pvItemToQueue,
+                        TickType_t xTickToWait);
+  ```
+
+* `xQueueReceive()`
+
+  ```c
+  BaseType_t xQueueReceive(QueueHandle_t xQueue,
+                           void * pvBuffer,
+                           TickType_t xTickToWait);
+  ```
+
+* `xQueueCreate()`
+
+  ```c
+  QueueHandle_t xQueueCreate(UBaseType_t uxQueueLength,
+                             UBaseType_t uxItemSize);
+  ```
+
+
+
+## Queuesets
+
+* Queue sets allow a task to receive data from more than one queue without the task polling each queue in turn to determine which, if any, contains data.
+
+* Enabling queue sets:
+
+  ```c
+  /* FreeRTOSConfig.h */
+  #define configUSE_QUEUE_SETS() 	1
+  ```
+
+### Commonly Used APIs
+
+* `xQueueCreateSet()`
+
+  ```c
+  QueueSetHandle_t xQueueCreateSet(const UBaseType_t uxEventQueueLength);
+  ```
+
+* `xQueueAddToSet()`
+
+  ```c
+  BaseType_t xQueueAddToSet(QueueSetMemberHandle_t xQueueOrSemaphore,
+                            QueueSetHandle_t xQueueSet);
+  ```
 
 
 
