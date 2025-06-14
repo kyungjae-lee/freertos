@@ -21,20 +21,33 @@ This repository contains various STM32 projects aimed at better understanding Fr
 
 * Variables are prefixed with their type:
 
-  * `c`: char
-  * `s`: short / uint16_t
-  * `l`: long / int32_t
-  * `x`: `BaseType_t` and any other non-standard types (e.g., structures, task handles, queue handles, etc.)
-  * `u`: unsigned
-  * `p`: pointer
+  * Variables of type `uint32_t` are prefixed **ul**, where the **'u'** denotes `unsigned` and the **'l'** denotes `long`.
+    * Question: Do I prefix `int32_t` type variable with just **'I'**? 
+  * Variables of type `uint16_t` are prefixed **us**, where the **'u'** denotes 'unsigned' and the 's' denotes `short`.
+  * Variables of type `uint8_t` are prefixed **uc**, where the **'u'** denotes 'unsigned' and the 'c' denotes `char`.
+  * **Variables of non stdint types are prefixed x**. Examples include `BaseType_t` and `TickType_t`, which are portable layer defined typedefs for the natural or most  efficient type for the architecture and the type used to hold the RTOS  tick count respectively.
+  * `Unsigned` variables of non stdint types have an additional prefix **u**. For example variables of type `UBaseType_t` (`unsigned BaseType_t`) are prefixed **ux**.
+  * Variables of type `size_t` are also prefixed **x**.
+  * Enumerated variables are prefixed **e**.
+  * Pointers have an additional prefixed **p**, for example a pointer to a `uint16_t` will have prefix **pus**.
+  * In line with MISRA guides, unqualified standard char types are only permitted to hold `ASCII characters` and are prefixed **c**.
+  * In line with MISRA guides, variables of type `char *` are only permitted to hold pointers to `ASCII strings` and are prefixed **pc**.
 
 ### Functions
 
-Functions are prefixed with both the type they return, and the module they are defined in.
+* Functions are prefixed with both the type they return, and the module they are defined in.
 
-* e.g., `vTaskPrioritySet()` - Returns a void, defined in `task.c`.
-* e.g., `xQueueReceive()` - Returns a variable of type `BaseType_t` and is defined within `queue.c`.
-* e.g., `pvTimerGetTimerID()` - Returns a pointer to void and is defined within `timers.c`.
+  * e.g., `vTaskPrioritySet()` - Returns a void, defined in `task.c`.
+
+  * e.g., `xQueueReceive()` - Returns a variable of type `BaseType_t` and is defined within `queue.c`.
+
+  * e.g., `pvTimerGetTimerID()` - Returns a pointer to void and is defined within `timers.c`.
+
+* File scope static (private) functions are prefixed with **prv**.
+
+* API functions are prefixed with their return type, as per the convention defined for variables, with the addition of the prefix **v** for `void`.
+
+* API function names start with the name of the file in which they are defined. For example `vTaskDelete` is defined in tasks.c, and has a `void` return type.
 
 ### Macros
 
@@ -224,6 +237,13 @@ Functions are prefixed with both the type they return, and the module they are d
 ### GPIO
 
 * Push-pull mode (for normal output pins) vs. Open-drain mode (for I2C, SPI pins)?
+
+
+
+## Insightful Discussions
+
+* Lecture 32: Working with Queues
+  * Hardfault issue: https://www.udemy.com/course/freertos-on-arm-processors/learn/lecture/26150680#questions/21063804
 
 
 
