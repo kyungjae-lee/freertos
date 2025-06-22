@@ -1,10 +1,12 @@
 /*******************************************************************************
  *
  * @file	main.c
- * @brief	Demonstrates how to create a periodic task in a FreeRTOS
+ * @brief	Demonstrates how to send complex data with queues in a FreeRTOS
  * 			application.
  * @author	Kyungjae Lee
- * @date	Jun 7, 2025
+ * @date	Jun 21, 2025
+ * @todo	This application contains a bug. Check for possible stack overflow,
+ * 			data corruption, or race conditions.
  *
  ******************************************************************************/
 
@@ -12,27 +14,45 @@
 #include <stdio.h>
 #include "main.h"
 #include "cmsis_os.h"
-
-/* Macros --------------------------------------------------------------------*/
-#define DELAY_1000_MS_TICKS pdMS_TO_TICKS(1000)
-
-/* Data types ----------------------------------------------------------------*/
-typedef uint32_t TaskProfiler;
-
-/* Variables -----------------------------------------------------------------*/
-TaskProfiler uRedTaskProfiler;
-TaskProfiler uBlueTaskProfiler;
-TaskProfiler uGreenTaskProfiler;
-UART_HandleTypeDef huart2;
+#include "queue.h"
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
+int Uart2_Putchar(int ch);
 int __io_putchar(int ch);
-void vBlueLedControllerTask(void *pvParameters);
-void vRedLedControllerTask(void *pvParameters);
-void vGreenLedControllerTask(void *pvParameters);
+void SendDataToQueueTask(void *pvParameters);
+void ReceiveDataFromQueueTask(void *pvParameters);
+
+/* Data types ----------------------------------------------------------------*/
+typedef enum
+{
+	HUMIDITY_SENSOR,
+	PRESSURE_SENSOR
+} SensorType_t;
+
+/** Structure defining the data type to be passed to the queue. */
+typedef struct
+{
+	uint8_t ucValue;
+	SensorType_t xSensor;
+} DataType_t;
+
+/* Variables -----------------------------------------------------------------*/
+UART_HandleTypeDef huart2;
+static const DataType_t xData[2] =
+{
+	{77, HUMIDITY_SENSOR},	/* Used by humidity sensor. */
+	{63, PRESSURE_SENSOR}	/* Used by pressure sensor. */
+};
+
+TaskHandle_t xSendHumidityDataToQueueTaskHandle;
+TaskHandle_t xSendPressureDataToQueueTaskHandle;
+TaskHandle_t xReceiveDataFromQueueTaskHandle;
+QueueHandle_t xSensorDataQueue;
+uint32_t ulSendHumidityDataToQueueTaskProfiler;
+uint32_t ulSendPressureDataToQueueTaskProfiler;
 
 /**
  * @brief The application entry point.
@@ -49,28 +69,40 @@ int main(void)
 	MX_GPIO_Init();
 	MX_USART2_UART_Init();
 
-	/* Create tasks */
-	xTaskCreate(vGreenLedControllerTask,
-				"Green Led Controller",
+	/* Create queue */
+	xSensorDataQueue = xQueueCreate(3, sizeof(DataType_t));
+	if (NULL == xSensorDataQueue)
+	{
+		printf("Error: Queue could not be created.\r\n");
+		while (1)
+		{
+			/* Hang here to prevent using a null queue. */
+		}
+	}
+
+	/* Create tasks. */
+	xTaskCreate(ReceiveDataFromQueueTask,
+				"ReceiveDataFromQueueTask",
 				100,
 				NULL,
 				1,
-				NULL);
+				&xReceiveDataFromQueueTaskHandle);
 
-	xTaskCreate(vRedLedControllerTask,
-				"Red Led Controller",
+	xTaskCreate(SendDataToQueueTask,
+				"SendHumidityDataToQueueTask",
 				100,
-				NULL,
-				1,
-				NULL);
+				(void *)&(xData[0]),
+				2,
+				&xSendHumidityDataToQueueTaskHandle);
 
-	xTaskCreate(vBlueLedControllerTask,
-				"Blue Led Controller",
+	xTaskCreate(SendDataToQueueTask,
+				"SendPressureDataToQueueTask",
 				100,
-				NULL,
-				1,
-				NULL);
+				(void *)&(xData[1]),
+				2,
+				&xSendPressureDataToQueueTaskHandle);
 
+	/* Start scheduler. */
 	vTaskStartScheduler();
 
 	/* We should never get here as control is now taken by the scheduler */
@@ -83,48 +115,88 @@ int main(void)
 }
 
 /**
- * @brief A 500ms periodic task that increments its profiler.
- * @retval None
+ * @brief Sends data to a FreeRTOS queue.
+ * @param pvParameters Pointer to a DataType_t structure containing the sensor
+ * data to be sent. This should be passed in a task parameter during task
+ * creation.
+ * @return None.
+ * @note This task retrieves a pointer to a sensor data structure from its
+ * parameter, and periodically attempts to send it to a shared queue. If the
+ * queue is full, the task waits for up to 200ms for space to become available.
+ * The task then performs a non-blocking delay to simulate periodic behavior.
  */
-void vGreenLedControllerTask(void *pvParameters)
+void SendDataToQueueTask(void *pvParameters)
 {
-	/* Note: FreeRTOS delay functions take ticks as arguments, not time in
-	 * milliseconds. To simplify conversion, FreeRTOS provides the
-	 * pdMS_TO_TICKS() macro. */
-	const TickType_t xPeriodTicks = pdMS_TO_TICKS(500); /* 500ms */
-	TickType_t xLastWakeTicks;
+	BaseType_t xQueueStatus;
 
-	xLastWakeTicks = xTaskGetTickCount();
+	/* Enter the Blocked state for 200ms for space to become available in the
+	 * queue when the queue is full. */
+	const TickType_t xWaitTicks = pdMS_TO_TICKS(200);
 
 	while (1)
 	{
-		vTaskDelayUntil(&xLastWakeTicks, xPeriodTicks);
-		uGreenTaskProfiler++;
+		xQueueStatus = xQueueSend(xSensorDataQueue, pvParameters, xWaitTicks);
+		if (pdPASS != xQueueStatus)
+		{
+			/* Do nothing. */
+		}
+
+		/* Introduce a non-blocking delay. */
+		for (volatile int i = 0; i < 500000; i++)
+		{
+			/* Do nothing. */
+		}
 	}
 }
 
 /**
- * @brief A sample task handler to increment its profiler.
- * @retval Nonee
+ * @brief Receives data from a FreeRTOS queue.
+ * @param pvParameters Unused. Included for compatibility with FreeRTOS task
+ * signature.
+ * @return None.
+ * @note This task continuously attempts to receive 'DataType_t' items from the
+ * shared queue. Upon successful reception, it checks the sensor type and prints
+ * the corresponding value over UART. It also increments profiler counters for
+ * each sensor type to track how often data is received.
  */
-void vRedLedControllerTask(void *pvParameters)
+void ReceiveDataFromQueueTask(void *pvParameters)
 {
+	DataType_t xReceivedData;
+	BaseType_t xQueueStatus;
+
 	while (1)
 	{
-		uRedTaskProfiler++;
+		xQueueStatus = xQueueReceive(xSensorDataQueue, &xReceivedData, 0);
+		if (pdPASS == xQueueStatus)
+		{
+			if (HUMIDITY_SENSOR == xReceivedData.xSensor)
+			{
+				printf("Humidity sensor value: %d\r\n", xReceivedData.ucValue);
+				ulSendHumidityDataToQueueTaskProfiler++;
+			}
+			else
+			{
+				printf("Pressure sensor value: %d\r\n", xReceivedData.ucValue);
+				ulSendPressureDataToQueueTaskProfiler++;
+			}
+		}
+		else
+		{
+			/* Handle failure in receiving from the queue. */
+		}
 	}
 }
 
-/**
- * @brief A sample task handler to increment its profiler.
- * @retval None
- */
-void vBlueLedControllerTask(void *pvParameters)
+int Uart2_Putchar(int ch)
 {
-	while (1)
+	while (!(USART2->SR & 0x0080))
 	{
-		uBlueTaskProfiler++;
+		/* Do nothing */
 	}
+
+	USART2->DR = (ch & 0xFF);
+
+	return ch;
 }
 
 /**
@@ -136,7 +208,11 @@ void vBlueLedControllerTask(void *pvParameters)
  */
 int __io_putchar(int ch)
 {
-	HAL_UART_Transmit(&huart2, (uint8_t*) &ch, 1, 0xFFFF);
+	//HAL_UART_Transmit(&huart2, (uint8_t*) &ch, 1, 0xFFFF);
+	/* The above function call has been replaced by the following function to
+	 * avoid the Hard Fault caused by the printf() function, which is not
+	 * reentrant, getting interrupted. */
+	Uart2_Putchar(ch);
 	return ch;
 }
 

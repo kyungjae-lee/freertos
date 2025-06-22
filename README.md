@@ -3,6 +3,12 @@ This repository contains various STM32 projects aimed at better understanding Fr
 
 
 
+## TODO
+
+* `16_Send_Complex_Data_With_Queues` - Fix bug.
+
+
+
 ## FreeRTOS Naming Conventions
 
 ### Variables
@@ -233,6 +239,14 @@ This repository contains various STM32 projects aimed at better understanding Fr
   * If you want to add a delay to a task but don't want to block it (i.e., keep it in Running state), simply use the `for` loop to implement a delay instead of using `vTaskDelay()`.
 * FreeRTOS configuration options can be modified through the `FreeRTOSConfig.h` file.
 * A deleted task cannot be resumed.
+* When using a `for` loop to introduce a non-blocking delay, make sure to use the `volatile` keyword for the counter to preventing it from getting optimized by the compiler:
+
+  ```c
+  for (volatile int i = 0; i < 100000; i++)
+  {
+      /* Do nothing. */
+  }
+  ```
 
 ### GPIO
 
