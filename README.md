@@ -230,6 +230,102 @@ This repository contains various STM32 projects aimed at better understanding Fr
 
 
 
+## Semaphores
+
+A semaphore is a signal or a key sent between tasks or between tasks and interrupts. It does not carry any data.
+
+* Binary Semaphore
+
+  This semaphore can assume two values, 1 or 0, to indicate whether there is a signal or not. A task either has the key or it does not.
+
+* Counting Semaphore
+
+  A semaphore with an associate counter which can be incremented or decrements. The counter indicates the number of keys available to access a particular resource. (Usage: Counting events, resource management, etc.)
+
+  To enable the counting semaphore:
+
+  ```c
+  configUSE_COUNTING_SEMAPHORES	1		/* In FreeRTOSConfig.h */
+  ```
+
+* Mutex
+
+  Stands for 'mutual exclusion'. Allows multiple tasks to access a single shared resource but only one at a time.
+
+  To enable the mutex:
+
+  ```c
+  configUSE_MUTEXES	1		/* In FreeRTOSConfig.h */
+  ```
+
+### Commonly Used APIs
+
+* `xSemaphoreCreateBinary()`
+
+  ```c
+  SemaphoreHandle_t xSemaphoreCreateBinary(void);
+  ```
+
+* `xSemaphoreGive()`
+
+  ```c
+  BaseType_t xSemaphoreGive(SemaphoreHandle_t xSemaphore);
+  ```
+
+* `xSemaphoreGiveFromISR()`
+
+  ```c
+  BaseType_t xSemaphoreGiveFromISR(
+  	SemaphoreHandle_t xSemaphore,
+  	BaseType_t *pxHigherPriorityTaskWoken);
+  ```
+
+  > In FreeRTOS, the APIs that are safe to call from an ISR are suffixed with `FromISR`. For example, `xQueueSendFromISR()`, `xSemaphoreGiveFromISR()`, etc.
+
+* `xSemaphoreTake()`
+
+  ```c
+  BaseType_t xSemaphoreTake(
+  	SemaphoreHandle_t xSemaphore,
+  	TickType_t xTicksToWait);
+  ```
+
+* `xSemaphoreCreateCounting()`
+
+  ```c
+  SemaphoreHandle_t xSemaphoreCreateCounting(
+  	UBaseType_t uxMaxCount,
+  	UBaseType_t uxInitialCount);
+  ```
+
+* `xSemaphoreCreateMutex()`
+
+  ```c
+  SemaphoreHandle_t xSemaphoreCreateMutex(void);
+  ```
+
+### Issues Associated with Improper Usage of Semaphores
+
+* Priority Inversion
+
+  This occurs when a higher priority task waiting for a lower priority task inherently assumes the priority of the lower priority task.
+
+* Priority Inheritance
+
+  Temporarily raising the priority of the resource holder to the priority of the highest priority task waiting for the resource.
+
+* Deadlock
+
+  A deadlock occurs when two tasks cannot proceed because they are both waiting for a resource that is held by the other.
+
+### Gatekeeper Task
+
+* A gatekeeper task is a task that has sole ownership of a resource.
+* Only the gatekeeper task is allowed to access the resource directly. Any other task needing to access the resource can do so only indirectly by using the services of the gatekeeper.
+* A gatekeeper task can be used to reduce problems that might occur when we don't properly configure semaphores.
+
+
+
 ## Lessons Learned
 * The CMSIS-RTOS layer sits on top of the FreeRTOS layer and provides a common interface for various RTOSes. This allows programmers to write portable applications using a standardized API. In essence, CMSIS-RTOS is a wrapper around an existing RTOS.
 * The `cmcsis_os.h` header file includes `FreeRTOS.h`.
