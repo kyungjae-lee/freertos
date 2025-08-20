@@ -25,7 +25,7 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 
 int Uart2_Putchar(int ch);
-//int __io_putchar(int ch);
+int __io_putchar(int ch);
 
 void vRedLedControllerTask(void *pvParameters);
 void vOrangeLedControllerTask(void *pvParameters);
