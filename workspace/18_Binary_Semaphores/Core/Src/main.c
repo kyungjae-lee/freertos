@@ -23,10 +23,8 @@
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
-
-int Uart2_Putchar(int ch);
-int __io_putchar(int ch);
-
+static int Uart2_Putchar(int ch);
+//static int __io_putchar(int ch);
 void vRedLedControllerTask(void *pvParameters);
 void vOrangeLedControllerTask(void *pvParameters);
 void vBlueLedControllerTask(void *pvParameters);
@@ -34,15 +32,10 @@ void vBlueLedControllerTask(void *pvParameters);
 /* Variables -----------------------------------------------------------------*/
 UART_HandleTypeDef huart2;
 static SemaphoreHandle_t xBinarySemaphore;
-
 typedef uint32_t TaskProfiler;
 TaskProfiler uRedLedProfiler;
 TaskProfiler uOrangeLedProfiler;
 TaskProfiler uBlueLedProfiler;
-
-void vRedLedControllerTask(void *pvParameters);
-void vOrangeLedControllerTask(void *pvParameters);
-void vBlueLedControllerTask(void *pvParameters);
 
 /**
  * @brief The application entry point.
