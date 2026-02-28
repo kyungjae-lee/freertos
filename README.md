@@ -1,6 +1,8 @@
 # FreeRTOS
 This repository contains various STM32 projects aimed at better understanding FreeRTOS, along with lessons learned throughout the development process.
 
+## Hardware
+* NUCLEO-F446RE
 
 
 ## TODO
