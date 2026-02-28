@@ -8,6 +8,9 @@
  * 			run without delay the idle task will never get a chance to run. This
  * 			can be tested by commenting out the delays of the regular tasks.
  *
+ * 			'configUSE_IDLE_HOOK()' must be enabled in 'FreeRTOSConfig.h' file
+ * 			for this function to be called.
+ *
  ******************************************************************************/
 
 /* Includes ------------------------------------------------------------------*/
