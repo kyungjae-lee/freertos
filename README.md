@@ -5,9 +5,9 @@ This repository contains various STM32 projects aimed at better understanding Fr
 * NUCLEO-F446RE
 
 
-## TODO
+## Bug-fixes
 
-* `16_Send_Complex_Data_With_Queues` - Fix bug.
+* `16_Send_Complex_Data_With_Queues` - Make the priority of the `ReceiveDataFromQueueTask` higher than the `SendDataToQueueTask`s, and set the time-out for the `xQueueSend()` function to a non-zero value. 
 
 
 
