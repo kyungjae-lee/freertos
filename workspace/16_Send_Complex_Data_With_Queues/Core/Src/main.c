@@ -166,7 +166,9 @@ void ReceiveDataFromQueueTask(void *pvParameters)
 
 	while (1)
 	{
-		xQueueStatus = xQueueReceive(xSensorDataQueue, &xReceivedData, pdMS_TO_TICKS(100));
+		/* Until there's a data available in the queue, this function will block
+		 * indefinitely. */
+		xQueueStatus = xQueueReceive(xSensorDataQueue, &xReceivedData, portMAX_DELAY);
 		if (pdPASS == xQueueStatus)
 		{
 			if (HUMIDITY_SENSOR == xReceivedData.xSensor)
