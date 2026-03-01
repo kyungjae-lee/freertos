@@ -85,7 +85,7 @@ int main(void)
 				"ReceiveDataFromQueueTask",
 				100,
 				NULL,
-				1,
+				3,
 				&xReceiveDataFromQueueTaskHandle);
 
 	xTaskCreate(SendDataToQueueTask,
@@ -166,7 +166,7 @@ void ReceiveDataFromQueueTask(void *pvParameters)
 
 	while (1)
 	{
-		xQueueStatus = xQueueReceive(xSensorDataQueue, &xReceivedData, 0);
+		xQueueStatus = xQueueReceive(xSensorDataQueue, &xReceivedData, pdMS_TO_TICKS(100));
 		if (pdPASS == xQueueStatus)
 		{
 			if (HUMIDITY_SENSOR == xReceivedData.xSensor)
