@@ -10,6 +10,9 @@
  * 			receiver task waits on the queue set and prints whichever message
  * 			arrives first over UART.
  *
+ * 			To use QueueSet, 'configUSE_QUEUE_SETS' must be enabled in the
+ * 			'FreeRTOSConfig.h' file. If it doesn't exist, create one yourself.
+ *
  ******************************************************************************/
 
 /* Includes ------------------------------------------------------------------*/
@@ -116,8 +119,8 @@ int main(void)
 
 /**
  * @brief Sends data to a FreeRTOS queue.
- * @param pvParameters Pointer to a DataType_t structure containing the sensor
- * data to be sent. This should be passed in a task parameter during task
+ * @param pvParameters Unused. Included for compatibility with FreeRTOS task
+ * signature.
  * creation.
  * @return None.
  */
@@ -138,9 +141,8 @@ void vSendDataToQueueTask1(void *pvParameters)
 
 /**
  * @brief Sends data to a FreeRTOS queue.
- * @param pvParameters Pointer to a DataType_t structure containing the sensor
- * data to be sent. This should be passed in a task parameter during task
- * creation.
+ * @param pvParameters Unused. Included for compatibility with FreeRTOS task
+ * signature.
  * @return None.
  */
 void vSendDataToQueueTask2(void *pvParameters)
