@@ -2,8 +2,8 @@
  *
  * @file	main.c
  * @brief	Demonstrates concurrent digital and analog sensor reading using
- * 			FreeRTOS tasks with a mutex-protected UART interface for safe and
- * 			shared serial output.
+ * 			FreeRTOS tasks with a counting-semaphore-protected UART interface for
+ * 			safe and shared serial output.
  * @author	Kyungjae Lee
  * @date	Mar 28, 2026
  * @note	'semphr.h' must be included inside the 'cmsis_os.h' to use
@@ -51,7 +51,7 @@ int main(void)
 
 	printf("System Initializing...\n\r");
 
-	xSerialSemaphore = xSemaphoreCreateMutex();
+	xSerialSemaphore = xSemaphoreCreateCounting(1, 0); /* Total, initial */
 
 	/* Create tasks. */
 	xTaskCreate(vReadDigitalSensorTask,
@@ -67,6 +67,11 @@ int main(void)
 				NULL,
 				1,
 				NULL);
+
+	/* Note: Since we set the initial count to 0, we need to give a semaphore
+	 * first to make it available to a task. If you didn't want this approach,
+	 * you could also set the initial count to a non-zero value. */
+	xSemaphoreGive(xSerialSemaphore);
 
 	vTaskStartScheduler();
 
