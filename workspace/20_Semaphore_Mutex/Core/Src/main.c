@@ -1,9 +1,9 @@
 /*******************************************************************************
  *
  * @file	main.c
- * @brief	Demonstrates concurrent digital and analog sensor reading using
- * 			FreeRTOS tasks with a mutex-protected UART interface for safe and
- * 			shared serial output.
+ * @brief 	Demonstrates concurrent digital and analog sensor printing using
+ *        	FreeRTOS tasks, with a mutex ensuring safe shared access to the UART
+ *        	interface.
  * @author	Kyungjae Lee
  * @date	Mar 28, 2026
  * @note	'semphr.h' must be included inside the 'cmsis_os.h' to use
