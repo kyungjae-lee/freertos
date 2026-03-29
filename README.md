@@ -328,6 +328,89 @@ A semaphore is a signal or a key sent between tasks or between tasks and interru
 
 
 
+## Software Timers
+
+### Introduction
+
+* Software timers are used to schedule the execution of a function at a specified time in the future or periodically at a fixed frequency.
+* The function executed by a software timer is called its **callback function**.
+* Software timers are implemented under the control of the RTOS kernel.
+* They do not require hardware support and are independent of hardware timers.
+
+### Types
+
+* **Auto-reload timer**
+
+  Once started, it automatically restarts each time it expires, resulting in periodic execution of its callback function.
+
+* **One-shot timer**
+
+  Once started, it executes its callback function only once. It can be restarted manually but does not restart automatically.
+
+### Period
+
+* The time between a software timer start and its callback execution.
+
+### States
+
+* Auto-reload timer
+
+  
+
+  ![image-20260329142338044](C:\Users\klee\AppData\Roaming\Typora\typora-user-images\image-20260329142338044.png)
+
+
+
+* One-shot timer
+
+  
+
+  ![image-20260329142555076](C:\Users\klee\AppData\Roaming\Typora\typora-user-images\image-20260329142555076.png)
+
+  >Dormant - The callback function does not execute.
+  >
+  >Running - The callback function executes.
+
+### Commonly Used APIs
+
+* `xTimerCreate()`
+
+  ```c
+  TimerHandle_t xTimerCreate(
+  	const char * const pcTimerName,	/* Human-readable timer name */
+  	TickType_t xTimerPeriodInTicks,
+  	UBaseType_t uxAutoReload,		/* True (auto-reload) or false (one-shot) */
+      void * pvTimerID,
+  	TimerCallbackFunction_t pxCallbackFunction
+  );
+  ```
+
+* `xTimerStart()`
+
+  ```c
+  BaseType_t xTimerStart(
+      TimerHandle_t xTimer,
+  	TickType_tx TicksToWait
+  );
+  ```
+
+* `vTimerSetTimerID()`
+
+  ```c
+  void vTimerSetTimerID(
+  	const TimerHandle_t xTimer,
+  	void *pvNewID
+  );
+  ```
+
+* `pvTimerGetTimerID()`
+
+  ```c
+  void *pvTimerGetTimerID(TimerHandle_t xTimer);
+  ```
+
+
+
 ## Lessons Learned
 * The CMSIS-RTOS layer sits on top of the FreeRTOS layer and provides a common interface for various RTOSes. This allows programmers to write portable applications using a standardized API. In essence, CMSIS-RTOS is a wrapper around an existing RTOS.
 * The `cmcsis_os.h` header file includes `FreeRTOS.h`.
