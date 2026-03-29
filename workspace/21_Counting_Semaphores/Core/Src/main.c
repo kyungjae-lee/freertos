@@ -82,6 +82,12 @@ int main(void)
 	}
 }
 
+/**
+ * @brief Reads digital sensor data.
+ * @param pvParameters Unused parameter, included for compatibility with FreeRTOS
+ * task function signature.
+ * @return None.
+ */
 void vReadDigitalSensorTask(void *pvParameters)
 {
 	gpio_init();
@@ -105,6 +111,12 @@ void vReadDigitalSensorTask(void *pvParameters)
 	}
 }
 
+/**
+ * @brief Reads analog sensor data.
+ * @param pvParameters Unused parameter, included for compatibility with FreeRTOS
+ * task function signature.
+ * @return None.
+ */
 void vReadAnalogSensorTask(void *pvParameters)
 {
 	adc_init();
