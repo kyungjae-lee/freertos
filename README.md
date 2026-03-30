@@ -336,6 +336,7 @@ A semaphore is a signal or a key sent between tasks or between tasks and interru
 * The function executed by a software timer is called its **callback function**.
 * Software timers are implemented under the control of the RTOS kernel.
 * They do not require hardware support and are independent of hardware timers.
+* `timers.h` must be included inside the `cmsis_os.h` to use software timers.
 
 ### Types
 
