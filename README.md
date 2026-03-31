@@ -414,13 +414,20 @@ A semaphore is a signal or a key sent between tasks or between tasks and interru
 
 ## Lessons Learned
 * The CMSIS-RTOS layer sits on top of the FreeRTOS layer and provides a common interface for various RTOSes. This allows programmers to write portable applications using a standardized API. In essence, CMSIS-RTOS is a wrapper around an existing RTOS.
+
 * The `cmcsis_os.h` header file includes `FreeRTOS.h`.
+
 * Shortcut to commenting out multiple lines: highlight the area -> `ctrl` + `/`
+
 * The larger the priority number, the higher the priority.
+
 * `vTaskDelay()` puts a task to sleep, and the scheduler will remove it from the Running state and place it into the Blocked state for the specified number of ticks. Once the delay expires, the task is moved back to the Ready state and will be scheduled to run again according to its priority.
   * If you want to add a delay to a task but don't want to block it (i.e., keep it in Running state), simply use the `for` loop to implement a delay instead of using `vTaskDelay()`.
+  
 * FreeRTOS configuration options can be modified through the `FreeRTOSConfig.h` file.
+
 * A deleted task cannot be resumed.
+
 * When using a `for` loop to introduce a non-blocking delay, make sure to use the `volatile` keyword for the counter to preventing it from getting optimized by the compiler:
 
   ```c
@@ -428,6 +435,17 @@ A semaphore is a signal or a key sent between tasks or between tasks and interru
   {
       /* Do nothing. */
   }
+  ```
+  
+* When passing arguments to `xTaskCreate()`, the task priority can be specified relative to the IDLE task, which has the lowest priority.
+
+  ```c
+  xTaskCreate(vTaskName, 
+              "vTaskName",
+              STACK_SIZE,
+              NULL, 
+              tskIDLE_PRIORITY + 2,
+              NULL)
   ```
 
 ### GPIO

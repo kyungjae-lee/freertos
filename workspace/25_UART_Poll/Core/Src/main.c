@@ -1,11 +1,13 @@
 /*******************************************************************************
  *
  * @file	main.c
- * @brief	Demonstrates how to stop software timers in a FreeRTOS application.
+ * @brief	Demonstrates UART RX in polling mode.
  * @author	Kyungjae Lee
- * @date	Mar 29, 2026
- * @note	'timers.h' must be included inside the 'cmsis_os.h' to use
- * 			software timers.
+ * @date	Mar 30, 2026
+ * @note	'queue.h' must be included inside the 'cmsis_os.h' to use queues.
+ *
+ * 			To verify the functionality, type any character in the console
+ * 			and check whether it is reflected in the 'cRxByte' variable.
  *
  ******************************************************************************/
 
@@ -18,22 +20,19 @@
 #include "adc.h"
 
 /* Macros --------------------------------------------------------------------*/
-#define mainONE_SHOT_TIMER_PERIOD		(pdMS_TO_TICKS(4000UL))
-#define mainAUTO_RELOAD_TIMER_PERIOD	(pdMS_TO_TICKS(500UL))
+#define STACK_SIZE 128	/* 128 * 4 = 512 bytes */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 int __io_putchar(int ch);
-void prvOneShotTimerCallback(TimerHandle_t xTimer);
-void prvAutoReloadTimerCallback(TimerHandle_t xTimer);
+void vUartRxPollTask(void *pvParameters);
+void vUartPrintTask(void *pvParameters);
 
 /* Data types ----------------------------------------------------------------*/
-typedef uint32_t TaskProfiler;
 
 /* Variables -----------------------------------------------------------------*/
-TimerHandle_t xAutoReloadTimer, xOneShotTimer;
-BaseType_t xAutoReloadTimerStarted, xOneShotTimerStarted;
+static QueueHandle_t xUart2RxBytesQueue = NULL;
 
 /**
  * @brief The application entry point.
@@ -48,26 +47,23 @@ int main(void)
 
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
-	USART2_UART_TX_Init();
 
-	printf("System Initializing...\n\r");
+	/* Create tasks. */
+	xTaskCreate(vUartRxPollTask,
+				"vUartRxPollTask",
+				STACK_SIZE,
+				NULL,
+				tskIDLE_PRIORITY + 2,
+				NULL);
 
-	/* Create timers. */
-	xOneShotTimer = xTimerCreate("OneShotTimer",
-			mainONE_SHOT_TIMER_PERIOD,
-			pdFALSE,
-			0,
-			prvOneShotTimerCallback);
+	xTaskCreate(vUartPrintTask,
+				"vUartPrintTask",
+				STACK_SIZE,
+				NULL,
+				tskIDLE_PRIORITY + 3,
+				NULL);
 
-	xAutoReloadTimer = xTimerCreate("AutoReloadTimer",
-			mainAUTO_RELOAD_TIMER_PERIOD,
-			pdTRUE,
-			0,
-			prvAutoReloadTimerCallback);
-
-	/* Start timers. */
-	xOneShotTimerStarted = xTimerStart(xOneShotTimer, 0);
-	xAutoReloadTimerStarted = xTimerStart(xAutoReloadTimer, 0);
+	xUart2RxBytesQueue = xQueueCreate(10, sizeof(char));
 
 	vTaskStartScheduler();
 
@@ -79,40 +75,34 @@ int main(void)
 }
 
 /**
- * @brief One-shot timer callback function.
- * @param xTimer Timer associated with this callback function.
+ * @brief Polls the UART Rx.
+ * @param None.
  * @return None.
  */
-void prvOneShotTimerCallback(TimerHandle_t xTimer)
+void vUartRxPollTask(void *pvParameters)
 {
-	static TickType_t xTimeNow;
+	uint8_t rxByte;
+	USART2_UART_RX_Init();
 
-	/* Obtain the current tick count. */
-	xTimeNow = xTaskGetTickCount();
-	printf("One-shot timer callback in execution: %d\n\r", (int)xTimeNow);
+	while (1)
+	{
+		rxByte = USART2_read();
+		xQueueSend(xUart2RxBytesQueue, &rxByte, 0);
+	}
 }
 
-uint32_t ulTimeoutCount = 0;
-const uint8_t TIMER_STOP_COUNT = 10;
+char cRxByte;
 
 /**
- * @brief Auto-reload timer callback function.
- * @param xTimer Timer associated with this callback function.
+ * @brief Prints the received byte.
+ * @param None.
  * @return None.
  */
-void prvAutoReloadTimerCallback(TimerHandle_t xTimer)
+void vUartPrintTask(void *pvParameters)
 {
-	static TickType_t xTimeNow;
-
-	/* Obtain the current tick count. */
-	xTimeNow = xTaskGetTickCount();
-	printf("Auto-reload timer callback executing: %d\n\r", (int)xTimeNow);
-	ulTimeoutCount++;
-
-	if (TIMER_STOP_COUNT == ulTimeoutCount)
+	while (1)
 	{
-		printf("Timer_STOP_COUNT reached %d\n\r", (int)xTimeNow);
-		xTimerStop(xAutoReloadTimer, 0);
+		xQueueReceive(xUart2RxBytesQueue, &cRxByte, portMAX_DELAY);
 	}
 }
 
