@@ -1,13 +1,10 @@
 /*******************************************************************************
  *
  * @file	main.c
- * @brief	Demonstrates UART RX in interrupt mode.
+ * @brief	Demonstrates UART single-byte RX in interrupt mode.
  * @author	Kyungjae Lee
  * @date	Mar 31, 2026
  * @note	'queue.h' must be included inside the 'cmsis_os.h' to use queues.
- *
- * 			To verify the functionality, type any character in the console
- * 			and check whether it is reflected in the 'cRxByte' variable.
  *
  ******************************************************************************/
 
@@ -33,7 +30,7 @@ void vStartUartRxInterrupt(void);
 
 /* Variables -----------------------------------------------------------------*/
 static QueueHandle_t xUart2RxBytesQueue = NULL;
-static int rxInProgress = 0;
+static int iRxInProgress = 0;
 
 /**
  * @brief The application entry point.
@@ -93,7 +90,7 @@ void vUartPrintTask(void *pvParameters)
  */
 void vStartUartRxInterrupt(void)
 {
-	rxInProgress = 1;
+	iRxInProgress = 1;
 	USART2->CR1 |= (1U << 5);	/* Enable Rx interrupt. */
 	NVIC_SetPriority(USART2_IRQn, 6);
 	NVIC_EnableIRQ(USART2_IRQn);
