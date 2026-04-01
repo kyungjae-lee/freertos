@@ -1,15 +1,16 @@
 /*******************************************************************************
  *
  * @file	main.c
- * @brief	Demonstrates UART single-byte RX in interrupt mode.
+ * @brief	Demonstrates UART multi-byte RX in interrupt mode.
  * @author	Kyungjae Lee
- * @date	Mar 31, 2026
+ * @date	Apr 01, 2026
  * @note	'queue.h' must be included inside the 'cmsis_os.h' to use queues.
  *
  ******************************************************************************/
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdio.h>
+#include <string.h>
 #include "main.h"
 #include "cmsis_os.h"
 #include "uart.h"
@@ -18,19 +19,23 @@
 
 /* Macros --------------------------------------------------------------------*/
 #define STACK_SIZE 128	/* 128 * 4 = 512 bytes */
+#define EXPECTED_PKT_LEN 5
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 int __io_putchar(int ch);
 void vUartPrintTask(void *pvParameters);
-void vStartUart2RxInterrupt(void);
+int32_t vStartUart2RxInterrupt(char * buffer, uint_fast16_t len);
 
 /* Data types ----------------------------------------------------------------*/
 
 /* Variables -----------------------------------------------------------------*/
-static QueueHandle_t xUart2RxBytesQueue = NULL;
+static SemaphoreHandle_t xUartRxDoneSemphr = NULL;
 static int iRxInProgress = 0;
+static uint16_t usRxLen = 0;
+static uint16_t usRxItr = 0;
+static char * pcRxBuffer = NULL;
 
 /**
  * @brief The application entry point.
@@ -54,7 +59,8 @@ int main(void)
 				tskIDLE_PRIORITY + 3,
 				NULL);
 
-	xUart2RxBytesQueue = xQueueCreate(10, sizeof(char));
+	/* Create semaphore. */
+	xUartRxDoneSemphr = xSemaphoreCreateBinary();
 
 	vTaskStartScheduler();
 
@@ -66,54 +72,74 @@ int main(void)
 }
 
 char cRxByte;
+char cUartRxData[EXPECTED_PKT_LEN] = {0};
+char cUartRxCode[32] = {0};
 
 /**
- * @brief Prints the received byte.
+ * @brief Prints the received bytes.
  * @param None.
  * @return None.
  */
 void vUartPrintTask(void *pvParameters)
 {
 	USART2_UART_RX_Init();
-	vStartUart2RxInterrupt();
+
+	memset(cUartRxData, 0, sizeof(cUartRxData));
+
+	/* You need to type some characters within the first 10 seconds after
+	 * the program starts to run. */
+	const TickType_t timeout = pdMS_TO_TICKS(10000);
 
 	while (1)
 	{
-		xQueueReceive(xUart2RxBytesQueue, &cRxByte, portMAX_DELAY);
+		vStartUart2RxInterrupt(cUartRxData, EXPECTED_PKT_LEN);
+
+		if (xQueueSemaphoreTake(xUartRxDoneSemphr, timeout) == pdPASS)
+		{
+			if (EXPECTED_PKT_LEN == usRxItr)
+			{
+				sprintf(cUartRxCode, "received");
+			}
+			else
+			{
+				sprintf(cUartRxCode, "length mismatch");
+			}
+		}
+		else
+		{
+			sprintf(cUartRxCode, "timeout");
+		}
 	}
 }
 
 /**
- * @brief Starts UART2 RX interrupt-based reception.
+ * @brief Starts UART2 Rx interrupt-based reception.
  * @param None.
- * @return None.
+ * @return 0 if successful, -1 otherwise.
  */
-void vStartUart2RxInterrupt(void)
+int32_t vStartUart2RxInterrupt(char * buffer, uint_fast16_t len)
 {
-	iRxInProgress = 1;
-	USART2->CR1 |= (1U << 5);	/* Enable Rx interrupt. */
-	NVIC_SetPriority(USART2_IRQn, 6);
-	NVIC_EnableIRQ(USART2_IRQn);
+	if ((buffer != NULL) && !iRxInProgress)
+	{
+		iRxInProgress = 1;
+		usRxLen = len;
+		pcRxBuffer = buffer;
+		usRxItr = 0;
+
+		USART2->CR1 |= (1U << 5);	/* Enable Rx interrupt. */
+		NVIC_SetPriority(USART2_IRQn, 6);
+		NVIC_EnableIRQ(USART2_IRQn);
+
+		return 0;
+	}
+
+	return -1;
 }
 
 /**
  * @brief USART2 IRQ handler.
  * @param None.
  * @return None.
- * @note In FreeRTOS, the “higher priority task woken” mechanism is used in
- * ISR-safe API functions (e.g., xQueueSendFromISR, xSemaphoreGiveFromISR) to
- * indicate whether an interrupt has unblocked a task with a higher priority
- * than the currently running task.
- *
- * Typically, a variable like xHigherPriorityTaskWoken is passed by reference
- * to these functions. If the ISR causes a higher-priority task to become ready,
- * this variable is set to pdTRUE. This signals that a context switch should
- * occur immediately after the ISR exits, ensuring the higher-priority task
- * runs as soon as possible.
- *
- * To complete the process, a macro such as portYIELD_FROM_ISR() is called with
- * this flag, allowing the scheduler to perform the context switch efficiently
- * and maintain real-time responsiveness.
  */
 void USART2_IRQHandler(void)
 {
@@ -125,7 +151,13 @@ void USART2_IRQHandler(void)
 
 		if (iRxInProgress)
 		{
-			xQueueSendFromISR(xUart2RxBytesQueue, &temp, &xHigherPriorityTaskWoken);
+			pcRxBuffer[usRxItr++] =  temp;
+
+			if (usRxItr >= usRxLen)
+			{
+				iRxInProgress = 0;
+				xSemaphoreGiveFromISR(xUartRxDoneSemphr, &xHigherPriorityTaskWoken);
+			}
 		}
 	}
 
