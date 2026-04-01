@@ -448,6 +448,12 @@ A semaphore is a signal or a key sent between tasks or between tasks and interru
               NULL)
   ```
 
+* In FreeRTOS, the **“higher priority task woken”** mechanism is used in ISR-safe API functions (e.g., `xQueueSendFromISR`, `xSemaphoreGiveFromISR`) to indicate whether an interrupt has unblocked a task with a higher priority than the currently running task.
+
+  Typically, a variable like `xHigherPriorityTaskWoken` is passed by reference to these functions. If the ISR causes a higher-priority task to become ready, this variable is set to `pdTRUE`. This signals that a **context switch should occur immediately after the ISR exits**, ensuring the higher-priority task runs as soon as possible.
+
+  To complete the process, a macro such as `portYIELD_FROM_ISR()` is called with this flag, allowing the scheduler to perform the context switch efficiently and maintain real-time responsiveness.
+
 ### GPIO
 
 * Push-pull mode (for normal output pins) vs. Open-drain mode (for I2C, SPI pins)?
