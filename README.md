@@ -412,6 +412,42 @@ A semaphore is a signal or a key sent between tasks or between tasks and interru
 
 
 
+## Event Groups
+
+### Introduction
+
+* Event groups allow a task to remain in the **Blocked** state until a combination of one or more events occurs.
+* When the specified event (or combination of events) occurs, all tasks waiting on that condition are unblocked simultaneously.
+
+### Usage
+
+* Synchronizing multiple tasks
+* Broadcasting events to multiple tasks
+
+### Advantages
+
+* Event groups reduce RAM usage by replacing multiple binary semaphores with a single event group.
+
+### Characteristics
+
+* An event group is a set of event flags.
+* Each **event flag** is represented by a single bit, allowing all flags to be stored within a single variable.
+* Event flags are also referred to as **event bits**.
+
+### Configuration
+
+* The number of available event bits in an event group depends on the following configuration parameter defined in `FreeRTOSConfig.h`:
+
+  ```c
+  configUSE_16_BIT_TICKS 1 /* or 0 */
+  ```
+
+  > If set to 1: Each event group provides 8 usable event bits.
+  >
+  > If set to 0: Each event group provides 24 usable event bits.
+
+
+
 ## Lessons Learned
 * The CMSIS-RTOS layer sits on top of the FreeRTOS layer and provides a common interface for various RTOSes. This allows programmers to write portable applications using a standardized API. In essence, CMSIS-RTOS is a wrapper around an existing RTOS.
 
