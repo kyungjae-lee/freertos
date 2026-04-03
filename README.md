@@ -8,6 +8,7 @@ This repository contains various STM32 projects aimed at better understanding Fr
 ## Bug-fixes
 
 * `16_Send_Complex_Data_With_Queues` - Make the priority of the `ReceiveDataFromQueueTask` higher than the `SendDataToQueueTask`s, and set the time-out for the `xQueueSend()` function to a non-zero value. 
+* `31_Task_Notifications` - The message is not printing. Check if the bit settings in `void gpio_pc13_interrupt_init(void)` are correct. Ensure that `gpio_init()` is called in `main()`. Also, the drivers used in this project comes from `19_Drivers` project. Do all the cascading changes. (FYI, `gpio_pc13_interrupt_init` is used in `31_Task_Notifications` for the first time.)
 
 
 
@@ -447,6 +448,38 @@ A semaphore is a signal or a key sent between tasks or between tasks and interru
   > If set to 0: Each event group provides 24 usable event bits.
 
 
+
+## Task Notifications
+
+### Introduction
+
+* Task notifications allow tasks to communicate directly with each other without using intermediary communication objects such as queues, semaphores, or event groups.
+
+* To enable task notifications:
+
+  ```c
+  configUSE_TASK_NOTIFICATIONS	1		/* In FreeRTOSConfig.h */
+  ```
+
+### States
+
+* **Pending**
+
+  When a task receives a notification, its notification state is set to *pending*.
+
+* **Not Pending**
+
+  When a task reads its notification value, its notification state is set to *not pending*.
+
+### Advantages
+
+* Faster than using queues, semaphores, or event groups to perform equivalent operations.
+* Requires significantly less RAM than queues, semaphores (which act as intermediary memory consumers), or event groups.
+
+### Limitations
+
+* Unlike queues, semaphores, and event groups, task notifications cannot be used to send events or data from a task to an ISR (though they *can* be used to send events or data from an ISR to a task).
+* Unlike queues, semaphores, and event groups, task notifications cannot be broadcast to multiple tasks.
 
 ## Lessons Learned
 * The CMSIS-RTOS layer sits on top of the FreeRTOS layer and provides a common interface for various RTOSes. This allows programmers to write portable applications using a standardized API. In essence, CMSIS-RTOS is a wrapper around an existing RTOS.
