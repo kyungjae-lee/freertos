@@ -527,6 +527,64 @@ A semaphore is a signal or a key sent between tasks or between tasks and interru
 
 
 
+## CMSIS-RTOS
+
+### RTOS APIs
+
+* RTOS APIs define the programming interface (i.e., set of functions) that programmers use when interacting with the RTOS.
+* RTOS APIs expose all the RTOS functions.
+* CMSIS-RTOS APIs are not tied to a specific RTOS. They are implemented as a wrapper layer above the RTOS APIs.
+
+### Generic RTOS APIs
+
+* 2 generic APIs can be used with FreeRTOS:
+
+  * **CMSIS-RTOS**: Cortex Microcontroller Software Interface for RTOS
+
+    This is vendor-independent API standard created by ARM.
+
+  * **POSIX**: Portable Operating System Interface
+
+    This API is mostly used in general purpose operating systems such as Linux.
+
+* Pros:
+
+  * Allows code to be written once and run on multiple MCUs by changing only the underlying RTOS.
+  * Enables middleware vendors to develop against a single API while supporting multiple real-time operating systems.
+
+* Cons:
+
+  * Due to its generic nature, unique features of a specific RTOS may not be accessible.
+
+### Examples
+
+| FreeRTOS                                             | CMSIS-RTOS               |
+| ---------------------------------------------------- | ------------------------ |
+| `vTaskDelay()`                                       | `osDelay()`              |
+| `vTaskDelayUntil()`                                  | `osDelayUntil()`         |
+| `vTaskStartScheduler()`                              | `osKernelStart()`        |
+| `xTaskGetSchedulerState()`                           | `osKernelUnlock()`       |
+| `xTaskGetTickCount()`                                | `osKernelGetTickCount()` |
+| `vQueueUnregisterQueue()`<br />`vQueueDelete()`      | `osMessageQueueDelete()` |
+| `xQueueReceive()`                                    | `osMessageQueueGet()`    |
+| `xQueueCreate()`                                     | `osMessageQueueNew()`    |
+| `xQueueSendToBack()`                                 | `osMessageQueuePut()`    |
+| `xSemaphoreCreateMutex()`                            | `osMutexNew()`           |
+| `xSemaphoreGive()` <br />`xSemaphoreGiveRecursive()` | `osMutexRelease()`       |
+| `vSemaphoreDelete()`                                 | `osSemaphoreDelete()`    |
+| `usSemaphoreGetCount()`                              | `osSemaphoreGetCount()`  |
+| `xTimerDelete()`                                     | `osTimerDelete()`        |
+| `pcTimerGetName()`                                   | `osTimerGetName()`       |
+| `xTimerIsTimerActive()`                              | `osTimerIsRunning()`     |
+| `xTimerCreate()`                                     | `osTimerNew()`           |
+
+### Migration Considerations
+
+* In CMSIS-RTOS, the stack size argument for task creation functions is specified in *bytes*, whereas in FreeRTOS it is specified in *words*.
+* CMSIS-RTOS APIs typically use structures as input parameters.
+
+
+
 ## Lessons Learned
 * The CMSIS-RTOS layer sits on top of the FreeRTOS layer and provides a common interface for various RTOSes. This allows programmers to write portable applications using a standardized API. In essence, CMSIS-RTOS is a wrapper around an existing RTOS.
 
