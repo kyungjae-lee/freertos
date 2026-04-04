@@ -481,6 +481,52 @@ A semaphore is a signal or a key sent between tasks or between tasks and interru
 * Unlike queues, semaphores, and event groups, task notifications cannot be used to send events or data from a task to an ISR (though they *can* be used to send events or data from an ISR to a task).
 * Unlike queues, semaphores, and event groups, task notifications cannot be broadcast to multiple tasks.
 
+
+
+## FreeRTOS Scheduler
+
+### Introduction
+
+* The scheduling algorithm is the software routine that decides which task in the **Ready** state transitions into the **Running** state.
+
+### Scheduling Algorithm
+
+* The FreeRTOS scheduler ensures that tasks sharing the same priority are selected to enter the **Running** state in turn. This policy is referred to as **Round Robin** scheduling.
+* The Round Robin scheduling algorithm in FreeRTOS does not guarantee equal CPU time for tasks of the same priority; it only guarantees that **Ready** tasks of equal priority will enter the **Running** state in turn.
+
+### Terminologies
+
+* **Fixed Priority**
+
+  This scheduler does not change the priority assigned to tasks. However, it does not prevent tasks from changing their own priority or that of other tasks.
+
+* **Preemptive**
+
+  This scheduler immediately preempts the **Running** task if a higher-priority task enters the **Ready** state.
+
+  > Being preempted means being involuntarily (without explicitly yielding or blocking) moved out of the **Running** state and into the **Ready** state, allowing another task to enter the **Running** state.
+
+* Time Slicing
+
+  This scheduler shares processing time between tasks of equal priority, even when those tasks do not explicitly yield or enter the **Blocked** state.
+
+  Scheduling algorithms that use "Time Slicing" will select a new task to enter the **Running** state at the end of each time slice if there are other **Ready** tasks with the same priority.
+
+  > A time slice is the time between two RTOS tick interrupts.
+
+### Configuration
+
+* To enable scheduling:
+
+  ```c
+  #define configUSE_PREEMPTION()		1	/* In FreeRTOSConfig.h */
+  #define configUSE_TIME_SLICING()	1	/* In FreeRTOSConfig.h */
+  ```
+
+  > In FreeRTOS, time slicing behavior is controlled by `configUSE_TIME_SLICING`.
+
+
+
 ## Lessons Learned
 * The CMSIS-RTOS layer sits on top of the FreeRTOS layer and provides a common interface for various RTOSes. This allows programmers to write portable applications using a standardized API. In essence, CMSIS-RTOS is a wrapper around an existing RTOS.
 
